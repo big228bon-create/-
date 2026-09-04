@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Движение и его виды</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #07111f, #10233b);
+    color: white;
+}
+
+.container {
+    max-width: 1150px;
+    margin: auto;
+    padding: 25px;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 45px;
+    margin: 0 0 10px;
+}
+
+header p {
+    color: #9eb1c8;
+    font-size: 18px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+}
+
+.card {
+    background: #0e1b2d;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 15px 35px #0006;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.modes {
+    display: grid;
+    gap: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 12px;
+    padding: 13px 16px;
+    background: #162a43;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    background: #244363;
+}
+
+.mode.active {
+    background: #4cc9f0;
+    color: #06111d;
+    font-weight: bold;
+}
+
+.simulation {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 18px;
+    background:
+        linear-gradient(#102b45 0 65%, #183c2a 65%);
+    border: 1px solid #ffffff20;
+}
+
+.sun {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    right: 40px;
+    top: 30px;
+    border-radius: 50%;
+    background: #ffe08a;
+    box-shadow: 0 0 35px #ffe08a99;
+}
+
+.road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 55px;
+    height: 100px;
+    background: #394654;
+}
+
+.road::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 48px;
+    border-top: 5px dashed white;
+}
+
+.circle-track {
+    position: absolute;
+    width: 500px;
+    height: 300px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px dashed #ffffff55;
+    border-radius: 50%;
+    display: none;
+}
+
+.car {
+    position: absolute;
+    font-size: 50px;
+    left: 40px;
+    bottom: 85px;
+    z-index: 5;
+    transition: none;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.stat {
+    background: #091625;
+    padding: 13px;
+    border-radius: 12px;
+    text-align: center;
+    color: #9eb1c8;
+}
+
+.stat strong {
+    display: block;
+    color: white;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.controls button {
+    background: #4cc9f0;
+    color: #06111d;
+    font-weight: bold;
+}
+
+.controls .reset {
+    background: #263a52;
+    color: white;
+}
+
+.description {
+    margin-top: 15px;
+    background: #13243a;
+    border-radius: 15px;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.formula {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #091625;
+    border-radius: 8px;
+    color: #4cc9f0;
+    font-family: monospace;
+    font-size: 17px;
+}
+
+.quiz {
+    margin-top: 25px;
+}
+
+.answers {
+    display: grid;
+    gap: 9px;
+}
+
+.answers button {
+    text-align: left;
+}
+
+.result {
+    margin-top: 12px;
+    min-height: 25px;
+    font-weight: bold;
+}
+
+.correct {
+    color: #49d17d;
+}
+
+.wrong {
+    color: #ff657a;
+}
+
+.progress {
+    height: 8px;
+    background: #091625;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #4cc9f0;
+    transition: 0.3s;
+}
+
+@media (max-width: 800px) {
+
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    .simulation {
+        height: 320px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>🚀 Движение и его виды</h1>
+    <p>Интерактивная виртуальная лаборатория по физике</p>
+</header>
+
+<div class="layout">
+
+<!-- ЛЕВАЯ ПАНЕЛЬ -->
+
+<div class="card">
+
+<h2>Выбери движение</h2>
+
+<div class="modes">
+
+<button class="mode active"
+onclick="selectMode('uniform', this)">
+🟢 Равномерное
+</button>
+
+<button class="mode"
+onclick="selectMode('nonuniform', this)">
+🟡 Неравномерное
+</button>
+
+<button class="mode"
+onclick="selectMode('straight', this)">
+➡️ Прямолинейное
+</button>
+
+<button class="mode"
+onclick="selectMode('curve', this)">
+〰️ Криволинейное
+</button>
+
+<button class="mode"
+onclick="selectMode('circle', this)">
+🔵 Движение по окружности
+</button>
+
+</div>
+
+<div class="quiz">
+
+<h2>📝 Мини-тест</h2>
+
+<div class="progress">
+    <div class="progress-bar" id="progress"></div>
+</div>
+
+<div id="question"></div>
+
+<div class="answers" id="answers"></div>
+
+<div class="result" id="result"></div>
+
+</div>
+
+</div>
+
+
+<!-- ОСНОВНАЯ СИМУЛЯЦИЯ -->
+
+<div class="card">
+
+<h2 id="title">
+Равномерное движение
+</h2>
+
+<div class="simulation" id="simulation">
+
+<div class="sun"></div>
+
+<div class="road"></div>
+
+<div class="circle-track" id="circleTrack"></div>
+
+<div class="car" id="car">
+🚗
+</div>
+
+</div>
+
+
+<div class="controls">
+
+<button onclick="toggleSimulation()">
+⏯ Пуск / Пауза
+</button>
+
+<button class="reset" onclick="resetSimulation()">
+↺ Сброс
+</button>
+
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+Скорость
+<strong id="speed">5.0 м/с</strong>
+</div>
+
+<div class="stat">
+Время
+<strong id="time">0.0 с</strong>
+</div>
+
+<div class="stat">
+Путь
+<strong id="distance">0.0 м</strong>
+</div>
+
+<div class="stat">
+Ускорение
+<strong id="acceleration">0.0 м/с²</strong>
+</div>
+
+</div>
+
+
+<div class="description">
+
+<h2>💡 Что наблюдаем?</h2>
+
+<p id="description">
+Тело за равные промежутки времени проходит равные пути.
+Скорость остаётся постоянной.
+</p>
+
+<div class="formula" id="formula">
+s = v · t
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let mode = "uniform";
+
+let running = false;
+
+let time = 0;
+
+let distance = 0;
+
+let speed = 5;
+
+let angle = 0;
+
+let lastTime = performance.now();
+
+
+// ОПИСАНИЯ
+
+const modes = {
+
+uniform: {
+    title: "Равномерное движение",
+    description:
+    "Тело за равные промежутки времени проходит равные пути. Скорость остаётся постоянной.",
+    formula: "s = v · t"
+},
+
+nonuniform: {
+    title: "Неравномерное движение",
+    description:
+    "Скорость тела изменяется со временем. Например, автомобиль может разгоняться или тормозить.",
+    formula: "a = Δv / Δt"
+},
+
+straight: {
+    title: "Прямолинейное движение",
+    description:
+    "Тело движется по прямой траектории. Пример — автомобиль на прямом участке дороги.",
+    formula: "траектория → прямая"
+},
+
+curve: {
+    title: "Криволинейное движение",
+    description:
+    "Тело движется по кривой траектории. Направление движения изменяется.",
+    formula: "траектория → кривая"
+},
+
+circle: {
+    title: "Движение по окружности",
+    description:
+    "Тело движется по окружности. Направление скорости постоянно изменяется.",
+    formula: "aц = v² / R"
+}
+
+};
+
+
+// ВЫБОР РЕЖИМА
+
+function selectMode(newMode, button) {
+
+    mode = newMode;
+
+    document
+    .querySelectorAll(".mode")
+    .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+
+    document.getElementById("title").textContent =
+    modes[mode].title;
+
+    document.getElementById("description").textContent =
+    modes[mode].description;
+
+    document.getElementById("formula").textContent =
+    modes[mode].formula;
+
+    resetSimulation();
+}
+
+
+// ЗАПУСК / ПАУЗА
+
+function toggleSimulation() {
+
+    running = !running;
+
+    lastTime = performance.now();
+}
+
+
+// СБРОС
+
+function resetSimulation() {
+
+    running = false;
+
+    time = 0;
+    distance = 0;
+    angle = 0;
+    speed = 5;
+
+    lastTime = performance.now();
+
+    document.getElementById("car").style.left = "40px";
+    document.getElementById("car").style.bottom = "85px";
+
+    render();
+}
+
+
+// ПОЗИЦИЯ МАШИНЫ
+
+function moveCar(x, y) {
+
+    const car = document.getElementById("car");
+
+    car.style.left = x + "%";
+
+    car.style.bottom = y + "px";
+}
+
+
+// ОБНОВЛЕНИЕ СИМУЛЯЦИИ
+
+function update(now) {
+
+    const dt = Math.min(
+        (now - lastTime) / 1000,
+        0.05
+    );
+
+    lastTime = now;
+
+
+    if (running) {
+
+        time += dt;
+
+
+        // РАВНОМЕРНОЕ
+
+        if (mode === "uniform") {
+
+            speed = 5;
+
+            distance += speed * dt;
+
+            let x = 5 + (distance * 2) % 90;
+
+            moveCar(x, 85);
+
+        }
+
+
+        // НЕРАВНОМЕРНОЕ
+
+        if (mode === "nonuniform") {
+
+            speed = Math.min(
+                14,
+                2 + time * 1.5
+            );
+
+            distance += speed * dt;
+
+            let x =
+            5 + (distance * 1.8) % 90;
+
+            moveCar(x, 85);
+
+        }
+
+
+        // ПРЯМОЛИНЕЙНОЕ
+
+        if (mode === "straight") {
+
+            speed = 6;
+
+            distance += speed * dt;
+
+            let x =
+            5 + (distance * 2) % 90;
+
+            moveCar(x, 85);
+
+        }
+
+
+        // КРИВОЛИНЕЙНОЕ
+
+        if (mode === "curve") {
+
+            speed = 6;
+
+            distance += speed * dt;
+
+            let x =
+            5 + (time * 10) % 90;
+
+            let y =
+            85 + 45 * Math.sin(time * 1.8);
+
+            moveCar(x, y);
+
+        }
+
+
+        // ОКРУЖНОСТЬ
+
+        if (mode === "circle") {
+
+            speed = 6;
+
+            distance += speed * dt;
+
+            angle += dt * 1.8;
+
+            let x =
+            50 + 35 * Math.cos(angle);
+
+            let y =
+            105 + 90 * Math.sin(angle);
+
+            moveCar(x, y);
+
+        }
+
+
+        render();
+
+    }
+
+    requestAnimationFrame(update);
+}
+
+
+// ОТОБРАЖЕНИЕ ДАННЫХ
+
+function render() {
+
+    document.getElementById("speed").textContent =
+    speed.toFixed(1) + " м/с";
+
+    document.getElementById("time").textContent =
+    time.toFixed(1) + " с";
+
+    document.getElementById("distance").textContent =
+    distance.toFixed(1) + " м";
+
+
+    let acceleration = 0;
+
+    if (mode === "nonuniform") {
+        acceleration = 1.5;
+    }
+
+    document.getElementById("acceleration").textContent =
+    acceleration.toFixed(1) + " м/с²";
+
+
+    document.getElementById("circleTrack").style.display =
+    mode === "circle" ? "block" : "none";
+}
+
+
+// ЗАПУСК
+
+resetSimulation();
+
+requestAnimationFrame(update);
+
+
+// =============================
+// ТЕСТ
+// =============================
+
+const questions = [
+
+[
+"Как называется движение с постоянной скоростью?",
+[
+"Равномерное",
+"Неравномерное",
+"Криволинейное"
+],
+0
+],
+
+[
+"Что такое траектория?",
+[
+"Линия, по которой движется тело",
+"Скорость тела",
+"Масса тела"
+],
+0
+],
+
+[
+"Какое движение происходит по прямой?",
+[
+"Прямолинейное",
+"Криволинейное",
+"Движение по окружности"
+],
+0
+],
+
+[
+"Что происходит со скоростью при неравномерном движении?",
+[
+"Она изменяется",
+"Она всегда равна нулю",
+"Она не существует"
+],
+0
+],
+
+[
+"Как движется тело при движении по окружности?",
+[
+"По круговой траектории",
+"Только по прямой",
+"Не меняет положение"
+],
+0
+]
+
+];
+
+
+let questionNumber = 0;
+
+let score = 0;
+
+
+function loadQuestion() {
+
+    const q =
+    questions[questionNumber];
+
+
+    document.getElementById("question").innerHTML =
+    "<p><b>" +
+    q[0] +
+    "</b></p>";
+
+
+    const answers =
+    document.getElementById("answers");
+
+    answers.innerHTML = "";
+
+
+    q[1].forEach((answer, index) => {
+
+        const button =
+        document.createElement("button");
+
+        button.textContent =
+        answer;
+
+        button.onclick =
+        () => checkAnswer(index);
+
+        answers.appendChild(button);
+
+    });
+
+
+    document.getElementById("result").textContent =
+    "";
+
+
+    document.getElementById("progress").style.width =
+    (questionNumber / questions.length * 100) + "%";
+}
+
+
+function checkAnswer(index) {
+
+    const result =
+    document.getElementById("result");
+
+
+    if (index === questions[questionNumber][2]) {
+
+        score++;
+
+        result.textContent =
+        "✅ Правильно!";
+
+        result.className =
+        "result correct";
+
+    } else {
+
+        result.textContent =
+        "❌ Неверно. Попробуй ещё раз.";
+
+        result.className =
+        "result wrong";
+    }
+
+
+    setTimeout(() => {
+
+        questionNumber++;
+
+
+        if (questionNumber < questions.length) {
+
+            loadQuestion();
+
+        } else {
+
+            document.getElementById("question").innerHTML =
+            "<h3>🎉 Тест завершён!</h3>" +
+            "<p>Твой результат: <b>" +
+            score +
+            " из " +
+            questions.length +
+            "</b></p>";
+
+
+            document.getElementById("answers").innerHTML =
+            "<button onclick='restartQuiz()'>" +
+            "🔄 Пройти тест ещё раз" +
+            "</button>";
+
+
+            document.getElementById("progress").style.width =
+            "100%";
+        }
+
+    }, 800);
+
+}
+
+
+function restartQuiz() {
+
+    questionNumber = 0;
+
+    score = 0;
+
+    loadQuestion();
+}
+
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
